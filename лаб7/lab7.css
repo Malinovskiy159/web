@@ -1,0 +1,61 @@
+* {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.placeForFigure {
+    position: relative;
+    margin-left: 100px;
+    margin: 50px;
+}
+
+.field {
+    margin: 10px;
+}
+
+input[type="text"] {
+    border: 1px solid gray;
+    padding: 2px;
+}
+
+input[type="button"] {
+    border: 1px solid gray;
+    border-radius: 2px;
+    padding: 2px 3px;
+    margin-top: 1px;
+    background: linear-gradient(180deg, rgb(233, 230, 230), rgb(209, 208, 208));
+}
+
+input[type="button"]:hover {
+    border: 1px solid blue;
+}
+
+.square {
+    position: absolute;
+	width: 150px;
+	height: 150px;
+    background: red;
+    border: 1px solid black;
+    opacity: 0.8;
+}
+
+.triangle {
+    position: absolute;
+	width: 0;
+	height: 0;
+	border-left: 150px solid transparent;
+	border-right: 150px solid transparent;
+    border-bottom: 160px solid blue;
+    opacity: 0.8;
+}
+
+.circle {
+    position: absolute;
+	width: 150px;
+	height: 150px;
+	background: green;
+    border-radius: 50%;
+    border: 1px solid black;
+    opacity: 0.8;
+}
