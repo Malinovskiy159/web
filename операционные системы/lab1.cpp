@@ -1,50 +1,50 @@
 #include <iostream>
 #include <pthread.h>
-#include <unistd.h> // Для sleep()
+#include <unistd.h> // Г„Г«Гї sleep()
 
-// Глобальные переменные
+// ГѓГ«Г®ГЎГ Г«ГјГ­Г»ГҐ ГЇГҐГ°ГҐГ¬ГҐГ­Г­Г»ГҐ
 pthread_cond_t cond1 = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-int ready = 0; // Флаг состояния события (0 - событие отсутствует, 1 - событие готово)
+int ready = 0; // Г”Г«Г ГЈ Г±Г®Г±ГІГ®ГїГ­ГЁГї Г±Г®ГЎГ»ГІГЁГї (0 - Г±Г®ГЎГ»ГІГЁГҐ Г®ГІГ±ГіГІГ±ГІГўГіГҐГІ, 1 - Г±Г®ГЎГ»ГІГЁГҐ ГЈГ®ГІГ®ГўГ®)
 
-// Функция provide (аналог producer)
+// Г”ГіГ­ГЄГ¶ГЁГї provide (Г Г­Г Г«Г®ГЈ producer)
 void synchronized_provide() {
-    pthread_mutex_lock(&lock); // Захватываем мьютекс
-    if (ready == 1) {          // Если событие уже готово
+    pthread_mutex_lock(&lock); // Г‡Г ГµГўГ ГІГ»ГўГ ГҐГ¬ Г¬ГјГѕГІГҐГЄГ±
+    if (ready == 1) {          // Г…Г±Г«ГЁ Г±Г®ГЎГ»ГІГЁГҐ ГіГ¦ГҐ ГЈГ®ГІГ®ГўГ®
         pthread_mutex_unlock(&lock);
-        return;                // Выходим, не создавая новое событие
+        return;                // Г‚Г»ГµГ®Г¤ГЁГ¬, Г­ГҐ Г±Г®Г§Г¤Г ГўГ Гї Г­Г®ГўГ®ГҐ Г±Г®ГЎГ»ГІГЁГҐ
     }
-    ready = 1;                 // Устанавливаем флаг
+    ready = 1;                 // Г“Г±ГІГ Г­Г ГўГ«ГЁГўГ ГҐГ¬ ГґГ«Г ГЈ
     std::cout << "Event provided" << std::endl;
-    pthread_cond_signal(&cond1); // Уведомляем потребителя
-    pthread_mutex_unlock(&lock); // Освобождаем мьютекс
+    pthread_cond_signal(&cond1); // Г“ГўГҐГ¤Г®Г¬Г«ГїГҐГ¬ ГЇГ®ГІГ°ГҐГЎГЁГІГҐГ«Гї
+    pthread_mutex_unlock(&lock); // ГЋГ±ГўГ®ГЎГ®Г¦Г¤Г ГҐГ¬ Г¬ГјГѕГІГҐГЄГ±
 }
 
-// Функция consume (аналог consumer)
+// Г”ГіГ­ГЄГ¶ГЁГї consume (Г Г­Г Г«Г®ГЈ consumer)
 void synchronized_consume() {
-    pthread_mutex_lock(&lock); // Захватываем мьютекс
-    while (ready == 0) {       // Пока событие не готово
-        pthread_cond_wait(&cond1, &lock); // Ожидаем уведомления
+    pthread_mutex_lock(&lock); // Г‡Г ГµГўГ ГІГ»ГўГ ГҐГ¬ Г¬ГјГѕГІГҐГЄГ±
+    while (ready == 0) {       // ГЏГ®ГЄГ  Г±Г®ГЎГ»ГІГЁГҐ Г­ГҐ ГЈГ®ГІГ®ГўГ®
+        pthread_cond_wait(&cond1, &lock); // ГЋГ¦ГЁГ¤Г ГҐГ¬ ГіГўГҐГ¤Г®Г¬Г«ГҐГ­ГЁГї
         std::cout << "Awoke from wait" << std::endl;
     }
-    ready = 0;                 // Сбрасываем флаг
+    ready = 0;                 // Г‘ГЎГ°Г Г±Г»ГўГ ГҐГ¬ ГґГ«Г ГЈ
     std::cout << "Event consumed" << std::endl;
-    pthread_mutex_unlock(&lock); // Освобождаем мьютекс
+    pthread_mutex_unlock(&lock); // ГЋГ±ГўГ®ГЎГ®Г¦Г¤Г ГҐГ¬ Г¬ГјГѕГІГҐГЄГ±
 }
 
-// Поток поставщика
+// ГЏГ®ГІГ®ГЄ ГЇГ®Г±ГІГ ГўГ№ГЁГЄГ 
 void* producer_thread(void* arg) {
     while (true) {
-        synchronized_provide(); // Создаём событие
-        sleep(1);               // Задержка 1 секунда
+        synchronized_provide(); // Г‘Г®Г§Г¤Г ВёГ¬ Г±Г®ГЎГ»ГІГЁГҐ
+        sleep(1);               // Г‡Г Г¤ГҐГ°Г¦ГЄГ  1 Г±ГҐГЄГіГ­Г¤Г 
     }
     return nullptr;
 }
 
-// Поток потребителя
+// ГЏГ®ГІГ®ГЄ ГЇГ®ГІГ°ГҐГЎГЁГІГҐГ«Гї
 void* consumer_thread(void* arg) {
     while (true) {
-        synchronized_consume(); // Потребляем событие
+        synchronized_consume(); // ГЏГ®ГІГ°ГҐГЎГ«ГїГҐГ¬ Г±Г®ГЎГ»ГІГЁГҐ
     }
     return nullptr;
 }
@@ -52,11 +52,11 @@ void* consumer_thread(void* arg) {
 int main() {
     pthread_t producer, consumer;
 
-    // Создаём потоки
+    // Г‘Г®Г§Г¤Г ВёГ¬ ГЇГ®ГІГ®ГЄГЁ
     pthread_create(&producer, nullptr, producer_thread, nullptr);
     pthread_create(&consumer, nullptr, consumer_thread, nullptr);
 
-    // Ожидаем завершения потоков
+    // ГЋГ¦ГЁГ¤Г ГҐГ¬ Г§Г ГўГҐГ°ГёГҐГ­ГЁГї ГЇГ®ГІГ®ГЄГ®Гў
     pthread_join(producer, nullptr);
     pthread_join(consumer, nullptr);
 
